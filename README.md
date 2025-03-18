@@ -66,7 +66,7 @@ services:
     restart: unless-stopped
 
   mysql-cron-backup:
-    image: fradelg/mysql-cron-backup
+    image: mysql-cron-backup
     depends_on:
       - mariadb
     volumes:
@@ -75,14 +75,18 @@ services:
       - MYSQL_HOST=my_mariadb
       - MYSQL_USER=root
       - MYSQL_PASS=${MARIADB_ROOT_PASSWORD}
-      - MAX_BACKUPS=15
-      - INIT_BACKUP=0
-      # Every day at 03:00
-      - CRON_TIME=0 3 * * *
+      - MAX_BACKUPS=5
+      # - INIT_BACKUP=1
+      # - EXIT_BACKUP=1
+      - INIT_RESTORE_LATEST=1
+      # Every 30 minutes
+      - CRON_TIME=*/30 * * * *
       # Make it small
       - GZIP_LEVEL=9
-      # As of MySQL 8.0.21 this is needed
-      - MYSQLDUMP_OPTS=--no-tablespaces
+      # As of MySQL 8.0.21 this is needed. --databases is required to Create/Use the DB if it does not exist.
+      # The reason I made this fork is so that we could create the DB and populate the schema.
+      - MYSQLDUMP_OPTS=--databases --no-tablespaces 
+      - TZ=America/New_York
     restart: unless-stopped
 
 volumes:

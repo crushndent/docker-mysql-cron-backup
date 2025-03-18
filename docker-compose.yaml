@@ -1,7 +1,7 @@
 services:
-  mariadb:
-    image: mariadb:10.11
-    container_name: my_mariadb
+  mysql:
+    image: mysql:latest
+    container_name: mysql_bkup
     security_opt:
       - seccomp:unconfined
     expose:
@@ -10,9 +10,9 @@ services:
       - data:/var/lib/mysql
       - ${VOLUME_PATH}/backup:/backup
     environment:
-      - MYSQL_DATABASE=${DATABASE_NAME}
-      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
-      - MYSQL_ALLOW_EMPTY_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE="TEST"
+      - MYSQL_ROOT_PASSWORD="TEST"
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "healthcheck.sh", "--su-mysql", "--connect" ]
@@ -21,16 +21,16 @@ services:
 
   backup:
     build: .
-    image: fradelg/mysql-cron-backup
+    image: mysqlbkp
     depends_on:
-      mariadb:
+      mysql:
         condition: service_healthy
     volumes:
       - ${VOLUME_PATH}/backup:/backup
     environment:
-      - MYSQL_HOST=my_mariadb
+      - MYSQL_HOST=mysql_bkup
       - MYSQL_USER=root
-      - MYSQL_PASS=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_PASS="TEST"
       - MAX_BACKUPS=1
       - INIT_BACKUP=1
       - CRON_TIME=0 0 * * *

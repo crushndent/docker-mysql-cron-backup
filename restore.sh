@@ -25,17 +25,8 @@ else
     SQL=$(cat "$1")
 fi
 
-DB_NAME=${MYSQL_DATABASE:-${MYSQL_DB}}
-if [ -z "${DB_NAME}" ]
-then
-    echo "=> Searching database name in $1"
-    DB_NAME=$(echo "$SQL" | grep -oE '(Database: (.+))' | cut -d ' ' -f 2)
-fi
-[ -z "${DB_NAME}" ] && { echo "=> Database name not found" && exit 1; }
 
-echo "=> Restore database $DB_NAME from $1"
-
-if echo "$SQL" | mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASS" $MYSQL_SSL_OPTS "$DB_NAME"
+if echo "$SQL" | mysql -h "$MYSQL_HOST" -P "$MYSQL_PORT" -u "$MYSQL_USER" -p"$MYSQL_PASS" $MYSQL_SSL_OPTS 
 then
     echo "=> Restore succeeded"
 else
